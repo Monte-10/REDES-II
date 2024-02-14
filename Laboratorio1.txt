@@ -1,4 +1,4 @@
-#1. Estableciendo conexiones
+##1. Estableciendo conexiones
 
 ¿Cuántos interfaces tiene la máquina?
 La máquina tiene cinco interfaces de red, que son:
