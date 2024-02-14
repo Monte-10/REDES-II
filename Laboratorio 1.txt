@@ -14,3 +14,5 @@ virbr0 tiene asignada la dirección IP 192.168.122.1, que es una dirección priv
 vmnet1 tiene asignada la dirección IP 172.16.49.1, que es una dirección privada, dentro del rango 172.16.0.0 - 172.31.255.255.
 vmnet8 tiene asignada la dirección IP 172.16.140.1, que también es una dirección privada, dentro del mismo rango de 172.16.0.0 - 172.31.255.255.
 Para determinar si una dirección IP es pública o privada, se puede comparar con los rangos de direcciones IP reservados para uso privado según lo definido por la RFC 1918. Todas las direcciones IP listadas en esta salida son privadas, ya que caen dentro de los rangos reservados para redes privadas. Las direcciones públicas son aquellas que no están reservadas para uso privado y pueden ser accedidas directamente a través de Internet.
+
+CONEXION CON LSOF: nc        6720                        e420674    3u     IPv4              52771       0t0        TCP 10.250.1.21:52508->10.250.1.22:8001 (ESTABLISHED)
