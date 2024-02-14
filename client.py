@@ -7,6 +7,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('localhost', 8001))
 
 # Aquí puedes enviar y recibir datos usando s.send() y s.recv()
-s.send("pito")
+hola = 12314
+s.recv(hola)
 # Asegúrate de cerrar la conexión una vez completada la comunicación
 s.close()

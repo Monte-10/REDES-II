@@ -18,6 +18,7 @@ with conn:
     while True:
         # Recibir datos del cliente
         data = conn.recv(1024)
+        print(data)
         if not data:
             break  # Si no hay datos, salir del bucle
 
