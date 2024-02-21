@@ -31,3 +31,13 @@ Address: 2a00:1450:4003:801::200e
 
 # 3. Programación en Python con DNS
 Script subido por separado
+Resultado:
+  e420674@1-21-1-21:~$ python3 Lab03Ej03.py 
+  IP Address: 207.244.69.244
+  IP Address: 207.244.86.26
+  IP Address: 23.105.171.82
+  IP Address: 23.105.171.94
+  IP Address: 23.105.171.150
+  IP Address: 192.96.201.39
+  IP Address: 198.7.62.130
+
