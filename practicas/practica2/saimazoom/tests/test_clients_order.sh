@@ -9,12 +9,16 @@ echo "Controlador iniciado con PID $CONTROLLER_PID"
 
 sleep 2  # Esperar a que el controlador esté listo
 
-# Registrar un nuevo cliente y realizar un pedido
-python3 clients/launch_client.py --register "clientePrueba"
+# Registrar un nuevo cliente
+echo "Registrando cliente: clientePrueba..."
+python3 clients/commandline_client.py --register "clientePrueba"
 sleep 1  # Espera corta para asegurar el registro
-python3 clients/launch_client.py --order "clientePrueba" "pedido001" "1,2,3"
 
-sleep 5  # Dar tiempo para que el pedido se procese
+# Realizar un nuevo pedido
+echo "Realizando pedido: pedido001 por clientePrueba..."
+python3 clients/commandline_client.py --order "clientePrueba" "pedido001" "1,2,3"
+
+sleep 30  # Dar tiempo para que el pedido se procese
 
 # Finalizar el controlador
 kill $CONTROLLER_PID

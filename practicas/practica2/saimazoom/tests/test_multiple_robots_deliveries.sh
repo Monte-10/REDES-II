@@ -15,15 +15,20 @@ done
 
 sleep 2  # Esperar a que estén listos
 
-# Registrar un cliente y realizar múltiples pedidos
-python3 clients/launch_client.py --register "clienteMulti"
+# Registrar un cliente
+echo "Registrando cliente: clienteMulti..."
+python3 clients/commandline_client.py --register "clienteMulti"
+sleep 1  # Dar tiempo para asegurar el registro
+
+# Realizar múltiples pedidos
 for i in {1..5}; do
     order_id="multiOrder$i"
-    python3 clients/launch_client.py --order "clienteMulti" "$order_id" "1,2,3"
-    sleep 2
+    echo "Realizando pedido: $order_id..."
+    python3 clients/commandline_client.py --order "clienteMulti" "$order_id" "1,2,3"
+    sleep 2  # Pequeña pausa entre pedidos para permitir el procesamiento
 done
 
-sleep 15  # Dar tiempo para procesar los pedidos
+sleep 60  # Dar tiempo para procesar los pedidos
 
 # Finalizar todos los procesos
 kill $CONTROLLER_PID
