@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% if object %}Edit{% else %}New{% endif %} Rule</h1>
+<form method="post" novalidate>{% csrf_token %}
+  <div class="form-group">
+    <label for="description">Description:</label>
+    <textarea class="form-control" id="description" name="description" required>{{ form.description.value|default_if_none:'' }}</textarea>
+  </div>
+  <div class="form-group">
+    <label for="subject">Subject:</label>
+    <input type="text" class="form-control" id="subject" name="subject" value="{{ form.subject.value|default_if_none:'' }}" required>
+  </div>
+  <div class="form-group">
+    <label for="operator">Operator:</label>
+    <select class="form-control" id="operator" name="operator">
+      {% for value, name in form.fields.operator.choices %}
+        <option value="{{ value }}" {% if form.operator.value == value %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="value">Value:</label>
+    <input type="text" class="form-control" id="value" name="value" value="{{ form.value.value|default_if_none:'' }}" required>
+  </div>
+  <div class="form-group">
+    <label for="action">Action:</label>
+    <input type="text" class="form-control" id="action" name="action" value="{{ form.action.value|default_if_none:'' }}" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+  <a href="{% url 'iot:rule_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

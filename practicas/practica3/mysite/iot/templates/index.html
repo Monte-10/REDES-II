@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Configuration</h2>
+<div class="list-group">
+  <a href="{% url 'iot:device_list' %}" class="list-group-item list-group-item-action">Ver Dispositivos</a>
+  <a href="{% url 'iot:device_new' %}" class="list-group-item list-group-item-action">Agregar Dispositivo</a>
+  <a href="{% url 'iot:rule_list' %}" class="list-group-item list-group-item-action">Ver Reglas</a>
+  <a href="{% url 'iot:rule_new' %}" class="list-group-item list-group-item-action">Agregar Regla</a>
+</div>
+
+{% endblock %}
