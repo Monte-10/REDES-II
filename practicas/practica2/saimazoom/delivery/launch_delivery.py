@@ -6,7 +6,19 @@ import random
 from utils.config import (RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME,
                           RABBITMQ_PASSWORD, DELIVERY_QUEUE, DELIVERY_STATUS_QUEUE, CANCEL_NOTIFICATION_QUEUE)
 
+"""
+    Se encarga de simular el comportamiento de un repartidor.
+    
+    Returns:
+        None
+"""
 class DeliveryPerson:
+    """
+        Inicializa un nuevo repartidor con una tasa de éxito específica.
+        
+        Args:
+            success_rate: Tasa de éxito de las entregas (entre 0 y 1).
+    """
     def __init__(self, success_rate=0.8):
         self.success_rate = success_rate
         self.connection = self.create_connection()
@@ -19,12 +31,30 @@ class DeliveryPerson:
                                 auto_ack=True)
         self.cancelled_orders = set()
 
+    """
+        Se encarga de crear una conexión a RabbitMQ.
+        
+        Returns:
+            Una conexión a RabbitMQ.
+    """
     def create_connection(self):
         credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
         return pika.BlockingConnection(
             pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT, credentials=credentials)
         )
 
+    """
+        Se encarga de procesar una tarea de entrega.
+        
+        Args:
+            ch: Canal de comunicación.
+            method: Método de entrega.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_delivery_task_received(self, ch, method, properties, body):
         task = json.loads(body)
         order_id = task['order_id']
@@ -54,6 +84,16 @@ class DeliveryPerson:
             # Notificar al controlador el fallo final
             self.notify_controller(task['order_id'], 'Failed')
 
+    """
+        Se encarga de enviar una notificación al controlador con el estado de la entrega.
+        
+        Args:
+            order_id: Identificador del pedido.
+            status: Estado de la entrega.
+            
+        Returns:
+            None
+    """
     def notify_controller(self, order_id, status):
         """Envía una notificación al controlador con el estado de la entrega."""
         message = json.dumps({'order_id': order_id, 'status': status})
@@ -61,12 +101,30 @@ class DeliveryPerson:
                                    routing_key=DELIVERY_STATUS_QUEUE,
                                    body=message)
         
+    """
+        Se encarga de procesar una notificación de cancelación.
+        
+        Args:
+            ch: Canal de comunicación.
+            method: Método de entrega.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_cancel_notification_received(self, ch, method, properties, body):
         notification = json.loads(body)
         order_id = notification['order_id']
         self.cancelled_orders.add(order_id)  # Añade el pedido cancelado al conjunto
         print(f"Recibida notificación de cancelación para el pedido: {order_id}")
+    
+    """
+        Inicia el repartidor y espera tareas de entrega.
         
+        Returns:
+            None
+    """
     def start(self):
         print("Repartidor iniciado y esperando tareas de entrega...")
         self.channel.start_consuming()

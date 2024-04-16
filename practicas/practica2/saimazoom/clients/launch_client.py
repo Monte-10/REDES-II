@@ -1,6 +1,12 @@
 from commandline_client import CommandLineClient
 import time
 
+"""
+    Se encarga de simular el comportamiento de un cliente de línea de comandos.
+    
+    Returns:
+        None
+"""
 def main():
     client = CommandLineClient()
 

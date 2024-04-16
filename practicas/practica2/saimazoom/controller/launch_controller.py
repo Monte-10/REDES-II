@@ -5,8 +5,20 @@ from utils.config import (RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME,
                           RABBITMQ_PASSWORD, ORDER_QUEUE, ROBOT_WORK_QUEUE,
                           DELIVERY_QUEUE, CLIENT_REGISTRATION_QUEUE,
                           CLIENT_STATUS_QUEUE, CLIENT_CANCEL_QUEUE, ROBOT_STATUS_QUEUE, DELIVERY_STATUS_QUEUE, CANCEL_NOTIFICATION_QUEUE)
+"""
+    Clase que representa el controlador del sistema.
+    
+    Attributes:
+        connection: Conexión con RabbitMQ.
+        channel: Canal de comunicación con RabbitMQ.
+        clients: Registro de clientes.
+        orders: Registro de pedidos.
+"""
 
 class Controller:
+    """
+        Se encarga de inicializar el controlador del sistema.
+    """
     def __init__(self):
         self.connection = self.create_connection()
         self.channel = self.connection.channel()
@@ -14,6 +26,12 @@ class Controller:
         self.clients = {}  # Registro de clientes
         self.orders = {}  # Registro de pedidos
 
+    """
+        Se encarga de crear una conexión a RabbitMQ.
+        
+        Returns:
+            Una conexión a RabbitMQ.
+    """
     def create_connection(self):
         """Establece la conexión con RabbitMQ."""
         credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
@@ -21,6 +39,12 @@ class Controller:
             pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT, credentials=credentials)
         )
 
+    """
+        Se encarga de configurar las colas necesarias en RabbitMQ.
+        
+        Returns:
+            None
+    """
     def setup_queues(self):
         """Declara las colas necesarias en RabbitMQ."""
         queues = [ORDER_QUEUE, ROBOT_WORK_QUEUE, DELIVERY_QUEUE,
@@ -50,7 +74,19 @@ class Controller:
         self.channel.basic_consume(queue=CANCEL_NOTIFICATION_QUEUE,
                                  on_message_callback=self.on_cancel_notification,
                                     auto_ack=True)
+    
+    """
+        Se encarga de manejar el registro de nuevos clientes.
         
+        Args:
+            ch: Canal de comunicación con RabbitMQ.
+            method: Método de comunicación con RabbitMQ.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_client_registration(self, ch, method, properties, body):
         """Manejador para el registro de nuevos clientes."""
         data = json.loads(body)
@@ -58,6 +94,18 @@ class Controller:
         self.clients[client_id] = data
         print(f"Cliente registrado: {client_id}")
 
+    """
+        Se encarga de manejar los pedidos recibidos.
+        
+        Args:
+            ch: Canal de comunicación con RabbitMQ.
+            method: Método de comunicación con RabbitMQ.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_order_received(self, ch, method, properties, body):
         """Manejador para pedidos recibidos."""
         order_data = json.loads(body)
@@ -67,6 +115,18 @@ class Controller:
         # Asignar tarea al robot para procesar el pedido solo una vez
         self.assign_task_to_robot(order_data['order_id'])
 
+    """
+        Se encarga de manejar las solicitudes de estado de pedidos.
+        
+        Args:
+            ch: Canal de comunicación con RabbitMQ.
+            method: Método de comunicación con RabbitMQ.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_status_request(self, ch, method, properties, body):
         """Manejador para solicitudes de estado de pedidos."""
         request = json.loads(body)
@@ -77,6 +137,18 @@ class Controller:
         else:
             print(f"Pedido {order_id} no encontrado.")
 
+    """
+        Se encarga de manejar las solicitudes de cancelación de pedidos.
+        
+        Args:
+            ch: Canal de comunicación con RabbitMQ.
+            method: Método de comunicación con RabbitMQ.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_cancel_request(self, ch, method, properties, body):
         request = json.loads(body)
         order_id = request['order_id']
@@ -91,7 +163,19 @@ class Controller:
             print(f"Notificación de cancelación enviada para el pedido: {order_id}")
         else:
             print(f"No se puede cancelar el pedido {order_id}.")
+    
+    """
+        Se encarga de manejar las notificaciones de cancelación de pedidos.
+        
+        Args:
+            ch: Canal de comunicación con RabbitMQ.
+            method: Método de comunicación con RabbitMQ.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
             
+        Returns:
+            None
+    """
     def on_cancel_notification(self, ch, method, properties, body):
         notification = json.loads(body)
         order_id = notification['order_id']
@@ -107,6 +191,18 @@ class Controller:
         else:
             print(f"Notificación de cancelación recibida para pedido desconocido: {order_id}.")
 
+    """
+        Se encarga de manejar las actualizaciones de estado de los robots.
+        
+        Args:
+            ch: Canal de comunicación con RabbitMQ.
+            method: Método de comunicación con RabbitMQ.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_robot_status_update(self, ch, method, properties, body):
         update = json.loads(body)
         order_id = update['order_id']
@@ -124,6 +220,18 @@ class Controller:
         else:
             print(f"Actualización recibida para pedido desconocido {order_id}.")
     
+    """
+        Se encarga de manejar las actualizaciones de estado de las entregas.
+        
+        Args:
+            ch: Canal de comunicación con RabbitMQ.
+            method: Método de comunicación con RabbitMQ.
+            properties: Propiedades del mensaje.
+            body: Cuerpo del mensaje.
+            
+        Returns:
+            None
+    """
     def on_delivery_status_update(self, ch, method, properties, body):
         """Manejador para actualizaciones de estado de las entregas."""
         update = json.loads(body)
@@ -137,7 +245,16 @@ class Controller:
             print(f"Actualización del estado del pedido {order_id} a {new_status}")
         else:
             print(f"Actualización recibida para pedido desconocido {order_id}.")
+        
+    """
+        Se encarga de asignar una tarea al robot.
+        
+        Args:
+            order_id: Identificador del pedido.
             
+        Returns:
+            None
+    """
     def assign_task_to_robot(self, order_id):
         """Asigna una tarea al robot, solo si el pedido no ha sido cancelado."""
         if self.orders[order_id].get('status') == 'Cancelado':
@@ -148,7 +265,16 @@ class Controller:
                                    routing_key=ROBOT_WORK_QUEUE,
                                    body=json.dumps(task))
         print(f"Tarea asignada al robot para el pedido: {order_id}")
+    
+    """
+        Se encarga de asignar una tarea de entrega al repartidor.
         
+        Args:
+            order_id: Identificador del pedido.
+            
+        Returns:
+            None
+    """
     def assign_task_to_delivery(self, order_id):
         """Asigna una tarea de entrega al repartidor, solo si el pedido no ha sido cancelado y ha sido recogido."""
         if self.orders[order_id]['status'] in ['Cancelado', 'Fallo en recogida']:
@@ -159,7 +285,13 @@ class Controller:
                                    routing_key=DELIVERY_QUEUE,
                                    body=json.dumps(task))
         print(f"Tarea de entrega asignada al repartidor para el pedido: {order_id}")
-            
+    
+    """
+        Se encarga de iniciar el procesamiento de mensajes.
+        
+        Returns:
+            None
+    """
     def start(self):
         """Inicia el procesamiento de mensajes."""
         print("Controlador iniciado. Esperando mensajes...")
